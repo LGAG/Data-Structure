@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct stock{
+typedef struct stock {
 	char order[4];
 	int o;
 	double price;
 	int number;
 	char type;
 	char code[4];
-	char orderid;
-	struct stock *next;
+	int orderid;
+	struct stock *next =NULL;
 } stock;
 
 typedef struct {
@@ -25,12 +25,12 @@ void initialize(Q *q) {
 	q->size = 0;
 }
 
-void del(Q *q, stock *s){
-	if(q->size == 0) printf("Not Found\n");
-	else if(q->size == 1){
+void del(Q *q, stock *s) {
+	if (q->size == 0) printf("Not Found\n");
+	else if (q->size == 1) {
 		stock *tmp = (stock*)malloc(sizeof(stock));
 		tmp = q->head;
-		if(tmp->o == s->o){
+		if (tmp->o == s->o) {
 			q->head = NULL;
 			q->tail = NULL;
 			q->size = 0;
@@ -38,95 +38,107 @@ void del(Q *q, stock *s){
 		}
 		else printf("Not Found\n");
 	}
-	else{
+	else {
 		stock *tmp = (stock*)malloc(sizeof(stock));
 		tmp = q->head;
 		stock *p = (stock*)malloc(sizeof(stock));
 		p = q->head;
-		
+
 		int count = 0;
 		int flag = -1;
-		while(tmp->next != NULL){
+		while (tmp != NULL) {
 			p = tmp;
-			tmp = tmp->next;
-			
-			if(tmp->o == s->o){
-				if(tmp == q->head){
-					if(tmp->next != NULL){
+
+			if (tmp->o == s->o) {
+				if (tmp == q->head) {
+					if (tmp->next != NULL) {
 						q->head = tmp->next;
 						p = tmp;
+						q->size--;
+						flag = 2;
+						tmp = tmp->next;
 						free(p);
 					}
-					else{
+					else {
 						printf("???\n");
 					}
 				}
-				else{
+				else {
 					p->next = tmp->next;
 					stock *temp = (stock*)malloc(sizeof(stock));
-					temp =tmp;
+					temp = tmp;
+					tmp = tmp->next;
+					q->size--;
 					free(temp);
 					flag = 2;
-					tmp = p;
 				}
 			}
+			else tmp = tmp->next;
 		}
-		if(flag == -1) printf("Not Found\n");
+		if (flag == -1) printf("Not Found\n");
 	}
 }
 
-void DEL(Q *q, int s){
-	if(q->size == 0) printf("Not Found\n");
-	else if(q->size == 1){
+int DEL(Q *q, int s) {
+	if (q->size == 0) return 0;
+	else if (q->size == 1) {
 		stock *tmp = (stock*)malloc(sizeof(stock));
 		tmp = q->head;
-		if(tmp->o == s){
+		if (tmp->orderid == s) {
 			q->head = NULL;
 			q->tail = NULL;
 			q->size = 0;
+			printf("deleted order:orderid: %04d, stockid:%04d, price: %6.1lf, quantity: %4d, b/s: %c\n", tmp->orderid, tmp->o, tmp->price, tmp->number, tmp->type);
 			free(tmp);
 		}
-		else printf("Not Found\n");
+		else return 0;;
 	}
-	else{
+	else {
 		stock *tmp = (stock*)malloc(sizeof(stock));
 		tmp = q->head;
 		stock *p = (stock*)malloc(sizeof(stock));
 		p = q->head;
-		
+
 		int count = 0;
 		int flag = -1;
-		while(tmp->next != NULL){
+		while (tmp != NULL) {
 			p = tmp;
-			tmp = tmp->next;
 			
-			if(tmp->o == s){
-				if(tmp == q->head){
-					if(tmp->next != NULL){
-						q->head = tmp->next;
-						p = tmp;
+
+			if (p->orderid == s) {
+				if (p == q->head) {
+					if (p->next != NULL) {
+						q->head = p->next;
+						q->size--;
+						printf("deleted order:orderid: %04d, stockid:%04d, price: %6.1lf, quantity: %4d, b/s: %c\n", p->orderid, p->o, p->price, p->number, p->type);
 						free(p);
+						return 1;
 					}
-					else{
+					else {
 						printf("???\n");
 					}
 				}
-				else{
-					p->next = tmp->next;
-					stock *temp = (stock*)malloc(sizeof(stock));
-					temp =tmp;
-					free(temp);
-					flag = 2;
-					tmp = p;
+				else {
+					stock *x = (stock*)malloc(sizeof(stock));
+					x=q->head;
+					while(x->next!=p){
+						x=x->next;
+					}
+					x->next = p->next;
+					printf("deleted order:orderid: %04d, stockid:%04d, price: %6.1lf, quantity: %4d, b/s: %c\n", p->orderid, p->o, p->price, p->number, p->type);
+					free(p);
+					return 1;
 				}
 			}
+			tmp = tmp->next;
 		}
-		if(flag == -1) printf("Not Found\n");
+		if (flag == -1) return 0;;
 	}
+	return 1;
 }
 
 int push_buy(Q *q, stock *s) {
-	if(s->number == 0) return -2;
+	if (s->number == 0) return -2;
 	if (q->size == 0) {
 		q->head = s;
 		q->tail = s;
@@ -136,15 +148,15 @@ int push_buy(Q *q, stock *s) {
 	else {
 		stock *p = (stock*)malloc(sizeof(stock));
 		p = q->head;
-		while(1){
+		while (1) {
 
-			if(p->next == NULL){
+			if (p->next == NULL) {
 				q->tail->next = s;
 				q->tail = s;
 				q->size++;
 				return 2;
 			}
-			else if(p->next->o == s->o && s->price > p->next->price){
+			else if (p->next->o == s->o && s->price > p->next->price) {
 				s->next = p->next;
 				p->next = s;
 				return 3;
@@ -155,7 +167,7 @@ int push_buy(Q *q, stock *s) {
 }
 
 int push_sale(Q *q, stock *s) {
-	if(s->number == 0) return -2;
+	if (s->number == 0) return -2;
 	if (q->size == 0) {
 		q->head = s;
 		q->tail = s;
@@ -165,15 +177,15 @@ int push_sale(Q *q, stock *s) {
 	else {
 		stock *p = (stock*)malloc(sizeof(stock));
 		p = q->head;
-		while(1){
+		while (1) {
 
-			if(p->next == NULL){
+			if (p->next == NULL) {
 				q->tail->next = s;
 				q->tail = s;
 				q->size++;
 				return 2;
 			}
-			else if(p->next->o == s->o && s->price < p->next->price){
+			else if (p->next->o == s->o && s->price < p->next->price) {
 				s->next = p->next;
 				p->next = s;
 				return 3;
@@ -183,121 +195,129 @@ int push_sale(Q *q, stock *s) {
 	}
 }
 
-void out_a_stock(stock *s){
+void out_a_stock(stock *s) {
 	//printf("orderid: %04d, stockid:%c%c%c%c, price: %.1f, quantity: %d, b/s: %c\n",s->orderid,s->order[0],s->order[1],s->order[2],s->order[3],s->price,s->number,s->type);
-	printf("orderid: %04d, stockid:%04d, price: %.1lf, quantity: %d, b/s: %c\n",s->orderid,s->o,s->price,s->number,s->type);
+	printf("orderid: %04d, stockid:%04d, price: %6.1lf, quantity: %4d, b/s: %c\n", s->orderid, s->o, s->price, s->number, s->type);
 }
 
-int traverse(Q *q, int o){
+int traverse(Q *q, int o) {
 	stock *s = (stock*)malloc(sizeof(stock));
-	if(q->size == 0) return -1;
+	if (q->size == 0) return -1;
 	s = q->head;
-	if(s->o == o) out_a_stock(s);
-	while(s->next != NULL){
-		s=s->next;
-		if(s->o == o) out_a_stock(s);
+	if (s->o == o) out_a_stock(s);
+	while (s->next != NULL) {
+		s = s->next;
+		if (s->o == o) out_a_stock(s);
 	}
 	return 0;
 }
 
-int search_for_sale(Q *q, stock *s){
-	if(q->size == 0) return -1;
+int search_for_sale(Q *q, stock *s) {
 	stock *tmp = (stock*)malloc(sizeof(stock));
+	if (q->size == 0) return -1;
 	tmp = q->head;
-	if(tmp->o == s->o && s->price >= tmp->price){
-		if(s->number > tmp->number){
+	if (tmp->o == s->o && ((int)(tmp->price * 2 + 0.1) <= (int)(s->price * 2 + 0.1))) {
+		if (s->number > tmp->number) {
 			stock *p = (stock*)malloc(sizeof(stock));
 			p = q->head;
-			printf("1deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , s->orderid , tmp->orderid);
+			printf("deal--price:%6.1lf  quantity:%4d  buyorder:%04d  sellorder:%04d\n", (tmp->price + s->price) / 2.0, tmp->number, s->orderid, tmp->orderid);
 			s->number -= tmp->number;
-			del(q , p);
+			del(q, p);
+			tmp = q->head;
 		}
-		else if(s->number == tmp->number){
+		else if (s->number == tmp->number) {
 			stock *p = (stock*)malloc(sizeof(stock));
 			p = q->head;
-			printf("2deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , s->orderid , tmp->orderid);
+			printf("deal--price:%6.1lf  quantity:%4d  buyorder:%04d  sellorder:%04d\n", (tmp->price + s->price) / 2.0, tmp->number, s->orderid, tmp->orderid);
 			s->number -= tmp->number;
-			del(q , p);
+			del(q, p);
 			return 0;
 		}
-		else{
-			printf("3deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , s->number , s->orderid , tmp->orderid);
+		else {
+			printf("deal--price:%6.1lf  quantity:%4d  buyorder:%04d  sellorder:%04d\n", (tmp->price + s->price) / 2.0, s->number, s->orderid, tmp->orderid);
+			tmp->number -= s->number;
 			return 0;
 		}
 	}
-	while(tmp->next != NULL){	
+	while (tmp != NULL) {
 		stock *p = (stock*)malloc(sizeof(stock));
-		p = tmp->next;
+		p = tmp;
+		if (p->o == s->o && ((int)(p->price * 2 + 0.1) <= (int)(s->price * 2 + 0.1))) {
+			if (s->number > p->number) {
+				printf("deal--price:%6.1lf  quantity:%4d  buyorder:%04d  sellorder:%04d\n", (p->price + s->price) / 2.0, p->number, s->orderid, p->orderid);
+				s->number -= p->number;
+				del(q, p);
+
+			}
+			else if (s->number == p->number) {
+				printf("deal--price:%6.1lf  quantity:%4d  buyorder:%04d  sellorder:%04d\n", (p->price + s->price) / 2.0, p->number, s->orderid, p->orderid);
+				s->number -= p->number;
+				del(q, p);
+				return 0;
+			}
+			else {
+				printf("deal--price:%6.1lf  quantity:%4d  buyorder:%04d  sellorder:%04d\n", (p->price + s->price) / 2.0, s->number, s->orderid, p->orderid);
+				tmp->number -= s->number;
+				return 0;
+			}
+		}
 		tmp = tmp->next;
-		if(tmp->o == s->o && s->price >= tmp->price){
-		if(s->number > tmp->number){
-			printf("4deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , s->orderid , tmp->orderid);
-			s->number -= tmp->number;
-			del(q , p);
-		}
-		else if(s->number == tmp->number){
-			printf("5deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , s->orderid , tmp->orderid);
-			s->number -= tmp->number;
-			del(q , p);
-			return 0;
-		}
-		else{
-			printf("6deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , s->number , s->orderid , tmp->orderid);
-			return 0;
-		}
-	}
 	}
 	return 1;
 }
 
-int search_for_buy(Q *q, stock *s){
+int search_for_buy(Q *q, stock *s) {
 	stock *tmp = (stock*)malloc(sizeof(stock));
-	if(q->size == 0) return -1;
+	if (q->size == 0) return -1;
 	tmp = q->head;
-	if(tmp->o == s->o && tmp->price >= s->price){
-		if(s->number > tmp->number){
+	if (tmp->o == s->o && ((int)(tmp->price * 2 + 0.1) >= (int)(s->price * 2 + 0.1))) {
+		if (s->number > tmp->number) {
 			stock *p = (stock*)malloc(sizeof(stock));
 			p = q->head;
-			printf("deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , tmp->orderid , s->orderid);
+			printf("deal--price:%6.1lf  quantity:%4d  sellorder:%04d  buyorder:%04d\n", (tmp->price + s->price) / 2.0, tmp->number, s->orderid, tmp->orderid);
 			s->number -= tmp->number;
-			del(q ,p);
-			
+			//tmp=tmp->next;
+
+			del(q, p);
+			tmp = q->head;
 		}
-		else if(s->number == tmp->number){
+		else if (s->number == tmp->number) {
 			stock *p = (stock*)malloc(sizeof(stock));
 			p = q->head;
-			printf("deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , tmp->orderid , s->orderid);
+			printf("deal--price:%6.1lf  quantity:%4d  sellorder:%04d  buyorder:%04d\n", (tmp->price + s->price) / 2.0, tmp->number, s->orderid, tmp->orderid);
 			s->number -= tmp->number;
-			del(q ,p);
+			del(q, p);
 			return 0;
 		}
-		else{
-			printf("deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , s->number , tmp->orderid , s->orderid);
+		else {
+			printf("deal--price:%6.1lf  quantity:%4d  sellorder:%04d  buyorder:%04d\n", (tmp->price + s->price) / 2.0, s->number, s->orderid, tmp->orderid);
+			tmp->number -= s->number;
 			return 0;
 		}
 	}
-	while(tmp->next != NULL){
+	while (tmp != NULL) {
 		stock *p = (stock*)malloc(sizeof(stock));
-		p = tmp->next;
+		p = tmp;
+		if (p->o == s->o && ((int)(tmp->price * 2 + 0.1) >= (int)(s->price * 2 + 0.1))) {
+			if (s->number > p->number) {
+				printf("deal--price:%6.1lf  quantity:%4d  sellorder:%04d  buyorder:%04d\n", (p->price + s->price) / 2.0, p->number, s->orderid, p->orderid);
+				s->number -= p->number;
+				del(q, p);
+
+			}
+			else if (s->number == p->number) {
+				printf("deal--price:%6.1lf  quantity:%4d  sellorder:%04d  buyorder:%04d\n", (p->price + s->price) / 2.0, p->number, s->orderid, p->orderid);
+				s->number -= p->number;
+				del(q, p);
+				return 0;
+			}
+			else {
+				printf("deal--price:%6.1lf  quantity:%4d  sellorder:%04d  buyorder:%04d\n", (p->price + s->price) / 2.0, s->number, s->orderid, p->orderid);
+				tmp->number -= s->number;
+				return 0;
+			}
+		}
 		tmp = tmp->next;
-		if(tmp->o == s->o && tmp->price >= s->price){
-		if(s->number > tmp->number){
-			printf("deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , tmp->orderid , s->orderid);
-			s->number -= tmp->number;
-			del(q ,p);
-			
-		}
-		else if(s->number == tmp->number){
-			printf("deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , tmp->number , tmp->orderid , s->orderid);
-			s->number -= tmp->number;
-			del(q ,p);
-			return 0;
-		}
-		else{
-			printf("deal--price:   %.1lf  quantity: %d  buyorder:%04d  sellorder:%04d\n",(tmp->price + s->price) / 2.0 , s->number , tmp->orderid , s->orderid);
-			return 0;
-		}
-	}
 	}
 	return 1;
 }
@@ -338,31 +358,32 @@ int main(void) {
 
 			if (tmp->type == 'b') {
 				printf("orderid: %d%d%d%d\n", tmp->code[0], tmp->code[1], tmp->code[2], tmp->code[3]);
-				if(head_sale->size != 0){
-					if(search_for_sale(head_sale , tmp) == 0){
+				if (head_sale->size != 0) {
+					if (search_for_sale(head_sale, tmp) == 0) {
 						free(tmp);
 					}
-					else{
+					else {
 						push_buy(head_buy, tmp);
 					}
 				}
-				else{
+				else {
 					push_buy(head_buy, tmp);
-				}	
+				}
 			}
 			else {
 				printf("orderid: %d%d%d%d\n", tmp->code[0], tmp->code[1], tmp->code[2], tmp->code[3]);
-				if(head_sale->size != 0){
-					if(search_for_buy(head_buy , tmp) == 0){
+				//	printf("head_buy->size=%d\n",head_buy->size);
+				if (head_buy->size != 0) {
+					if (search_for_buy(head_buy, tmp) == 0) {
 						free(tmp);
 					}
-					else{
+					else {
 						push_sale(head_sale, tmp);
 					}
 				}
-				else{
+				else {
 					push_sale(head_sale, tmp);
-				}	
+				}
 			}
 		}
 		else if (c == '2') {
@@ -373,17 +394,20 @@ int main(void) {
 			int INQUIRY = (inquiry[0] - '0') * 1000 + (inquiry[1] - '0') * 100 + (inquiry[2] - '0') * 10 + (inquiry[3] - '0');
 			getchar();
 			printf("buy orders:\n");
-			traverse(head_buy , INQUIRY);
+			traverse(head_buy, INQUIRY);
 			printf("sell orders:\n");
-			traverse(head_sale , INQUIRY);
+			traverse(head_sale, INQUIRY);
 		}
 		else if (c == '3') {
 			char ctrlz[4];
 			for (int i = 0; i < 4; i++) {
 				ctrlz[i] = getchar();
 			}
+			getchar();
 			int CTRLZ = (ctrlz[0] - '0') * 1000 + (ctrlz[1] - '0') * 100 + (ctrlz[2] - '0') * 10 + (ctrlz[3] - '0');
-			DEL(head_buy , CTRLZ);
+			int index1 = DEL(head_buy, CTRLZ);
+			int index2 = DEL(head_sale, CTRLZ);
+			if (index1 == 0 && index2 == 0) printf("not found\n");
 		}
 	}
 }

@@ -48,34 +48,34 @@ char popt()				/* 符号出栈 */
 
 long int numble()	// 数字整理。有小问题
 {
-	int flag=0;
+	int flag = 0;
 	p--;
-	if(*p == -1) flag = -1;
-//		p--;
-//		if(*p <='9' && *p >= '0') {
-//			;
-//		}
-//		else{
-//			flag =-1;
-//			popt();
-//		}
-//		p++;
-//	}
-	//printf("%c , %c\n",prt.dat[prt.top],prt.dat[prt.top+1]);
+	if (*p == -1) flag = -1;
+	//		p--;
+	//		if(*p <='9' && *p >= '0') {
+	//			;
+	//		}
+	//		else{
+	//			flag =-1;
+	//			popt();
+	//		}
+	//		p++;
+	//	}
+		//printf("%c , %c\n",prt.dat[prt.top],prt.dat[prt.top+1]);
 	p++;
 	long int b = 0;
 	int count = 0;
 	do
 	{
-		
+
 		count++;
 		b = b * 10 + *p - '0';   // 组成整数
 		p++;
 	} while (*p >= '0' && *p <= '9');
 	p--;
-	
-	if(flag == -1) b = -b;
-	printf("b = %d,count = %d\n",b,count);
+
+	if (flag == -1) b = -b;
+	//printf("b = %d,count = %d\n",b,count);
 	if (count == 0) return b / 10;
 	else return b;
 }
@@ -84,22 +84,43 @@ long operation(long int x, long int y, char a)
 {
 	switch (a)
 	{
-	case '+': return x + y;
-	case '-': return x - y;
-	case '*': return x * y;
-	case '/': if (y)	return x / y;
-			  else { printf("Divide 0.\n"); exit(0); }
-	case '%': return (long int)fmod(x, y);
-	case '^': if (y >= 0)	return (int)pow(x, y);
-			  else     	return 0;
+	case '+': //printf("%d + %d = %d\n",x,y,x+y); 
+		return x + y;
+	case '-': //printf("%d - %d = %d\n",x,y,x-y); 
+		return x - y;
+	case '*': //printf("%d * %d = %d\n",x,y,x*y); 
+		return x * y;
+	case '/': if (y) {
+		//printf("%d * %d = %d\n",x,y,x*y);
+		return x / y;
+		break;
+	}
+			  else {
+		printf("Divide 0.\n");
+		//exit(0); 
+		return -20191110;
+
+	}
+	case '%': //printf("%d %% %d = %d\n",x,y,x%y); 
+		return (long int)fmod(x, y);
+	case '^': if (y >= 0) {
+		//printf("%d ^ %d = %d\n",x,y,(int)pow(x, y));
+		return (int)pow(x, y);
+		break;
+	}
+			  else  {
+			  	printf("error.\n");
+			  	return -20191110;
+			  }   	
 	default:  printf("Error No. 3\n");
-		exit(1);
+		//exit(1);
+		return -20191110;
 	}
 }
 
 int signswitch(char a)	   /* 符号转换。可优化 */
 {
-	printf("a:%c\n",a);
+	//printf("a:%c\n",a);
 	switch (a)
 	{
 	case '+': return 0;   case '-': return 1;
@@ -107,11 +128,12 @@ int signswitch(char a)	   /* 符号转换。可优化 */
 	case '%': return 4;   case '^': return 5;
 	case '(': return 6;   case ')': return 7;
 	case '#': return 8;
-	default:  printf("Error No. 2\n");  exit(1);
+	default:  printf("Error No. 2\n"); return -1;
 	}
 }
 char refusal(char a, char b)   /* 判定优先级 */
 {
+	if (signswitch(a) == -1 || signswitch(b) == -1) return -1;
 	return PRI[signswitch(a)][signswitch(b)];
 }
 
@@ -119,45 +141,101 @@ char refusal(char a, char b)   /* 判定优先级 */
 int main(void)
 {
 	int nnn;
-	scanf("%d",&nnn);
-	while(nnn--){
+	scanf("%d", &nnn);
+	while (nnn--) {
+
+		for (int i = 0; i < 200; i++) {
+			prt.dat[i] = 0;
+			prd.dat[i] = 0;
+			chinput[i] = 0;
+		}
+
+
 		int i, j, k, l, flag = 0;  // flag=0前一个符号不是)
 		char b;
 		prt.dat[0] = '#';		// 表达式起始符入栈
 		prt.top = 1;
 		prd.top = 0;
-		printf("Enter Expression=");
+		//printf("Enter Expression=");
 		scanf("%s", chinput);  	// 接收运算式字符串
-		printf("%s\n",chinput);
-		printf("1\n");
+		//printf("输入的字符串是:%s\n",chinput);
+
 		strcat(chinput, "#");	  	// 在运算式结尾加#号
-		printf("2\n");
 		int len = strlen(chinput);
+		int ddd = 0;
 		for(int i=0;i<len;i++){
-			if(i==0){
-				if(chinput[i] == '-'){
-					if(chinput[i+1] <='9' && chinput[i+1] >='0'){
-						//chinput[i+1] = -chinput[i+1];
-						chinput[i]=-1;
+			if(chinput[i] =='(' || chinput[i] == ')'){
+				if(i-1>=0&&i+1<len){
+					if((chinput[i-1] >= '0' && chinput[i-1] <= '9') && (chinput[i+1] >= '0' && chinput[i+1] <= '9')){
+					//	printf("error.\n");
+						ddd=1;
+						break;
 					}
-					//else if(chinput[i+1] != '(')printf("error\n");
 				}
-				else{
-					if(chinput[i] == '-' && !(chinput[i-1] >= '0' && chinput[i-1] <= '9')){
-						if(chinput[i+1] <='9' && chinput[i+1] >='0'){
-							//chinput[i+1] = -chinput[i+1];
-							chinput[i]=-1;
+				if(chinput[i] == ')'){
+					if(i-1>=0){
+						if(chinput[i-1]=='+' || chinput[i-1]=='^' || chinput[i-1]=='*' || chinput[i-1]=='/' || chinput[i-1]=='-'){
+						//	printf("error.\n");
+						ddd=1;
+						break;
 						}
-						//else if(chinput[i+1] != '(')printf("error\n");
+					}
+				}
+				if(chinput[i]=='('){
+					if(i+1<len){
+						if(chinput[i+1]=='+' || chinput[i+1]=='^' || chinput[i+1]=='*' || chinput[i+1]=='/' || chinput[i+1]=='-'){
+							//printf("error.\n");
+						ddd=1;
+						break;
+						}
+					}
 				}
 			}
 		}
+		if (ddd == 1) {
+			printf("error.\n");
+			continue;
+		}
+		ddd=0;
+		for (int i = 0; i < len - 1; i++) {
+			if (chinput[i] >= '0' && chinput[i] <= '9');
+			else {
+				ddd = 1;
+			}
+		}
+		if (ddd == 0) {
+			printf("error.\n");
+			continue;
+		}
+		for (int i = 0; i < len - 1; i++) {
+			if (i == 0) {
+				if (chinput[i] == '-') {
+					if (chinput[i + 1] <= '9' && chinput[i + 1] >= '0') {
+						chinput[i] = -1;
+					}
+				}
+			}
+			else {
+				if (chinput[i] == '-' && !(chinput[i - 1] >= '0' && chinput[i - 1] <= '9')) {
+					if (chinput[i + 1] <= '9' && chinput[i + 1] >= '0') {
+						chinput[i] = -1;
+					}
+					//printf("chinput[%d]=%d\n",i,chinput[i+1]);
+				}
+			}
+
+		}
 		p = chinput;
-		printf("%s\n",p);
+		//printf("字符串p是:%s\n",p);
+		int FF = 0;
 		while (*p != '#' || prt.dat[prt.top - 1] != '#')
 		{
-			printf("begin loop.\n");
-			if(*p == -1) continue;
+			//printf("\nbegin loop.\n");
+			if (*p++ == -1) {
+				//printf("现在的*p: %d  %c\n",*p,*p);
+				continue;
+			}
+			p--;
 			if (*p >= '0' && *p <= '9')
 			{
 				j = numble();  // 若遇数字生成完整整数入栈
@@ -168,34 +246,62 @@ int main(void)
 			{
 				if (flag == 1 && *p == '(')
 				{
-					printf("Error No.1:%s\n", p);  exit(0);
+					printf("error.\n", p);
+					//exit(0);
+					FF = 1;
+					break;
 				}
 				else if (*p == ')')  flag = 1;
 				else 	         flag = 0;
-				
-					switch (refusal(prt.dat[prt.top - 1], *p))
-					{
-					case '<': pusht(*p++);  /* 高则入栈 */
+				int FLAG = 0;
+				switch (refusal(prt.dat[prt.top - 1], *p))
+				{
+				case -1:FLAG = 1;
+					break;
+				case '<': pusht(*p++);  /* 高则入栈 */
+					break;
+				case '=': popt();         /* 脱括号 */
+					p++;
+					break;
+				case '>': b = popt();  /* 低则进行栈顶计算 */
+					k = popd();  /* 第二操作数出栈 */
+					l = popd();  /* 第一操作数出栈 */
+					k = operation(l, k, b);	/* 计算 */
+					if (k == -20191110) {
+						FLAG = 1;
 						break;
-					case '=': popt();         /* 脱括号 */
-						p++;
-						break;
-					case '>': b = popt();  /* 低则进行栈顶计算 */
-						k = popd();  /* 第二操作数出栈 */
-						l = popd();  /* 第一操作数出栈 */
-						k = operation(l, k, b);	/* 计算 */
-						printf("k=%d\n",k);
-						pushd(k);	  /* 计算结果入栈 */
-						break;
-					case Nul: printf("Error No. 4:%s\n", p);
-						exit(1);
 					}
-	
+
+					pushd(k);	  /* 计算结果入栈 */
+					break;
+				case Nul: printf("error.\n", p);
+					//exit(1);
+					FLAG = 1;
+
+				}
+				//printf("k=%d\n", k);
+				if (FLAG == 1) {
+					FF = 1;
+					break;
+				}
 			}
-			printf("end loop.\n");
+			//printf("end loop.\n\n");
 		}
-			printf("%d\n", prd.dat[prd.top - 1]); //输出结果
+		if (FF == 1) continue;
+		printf("%d\n", prd.dat[prd.top - 1]); //输出结果
 	}
-	
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
 
