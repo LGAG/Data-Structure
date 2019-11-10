@@ -112,7 +112,7 @@ long operation(long int x, long int y, char a)
 			  	printf("error.\n");
 			  	return -20191110;
 			  }   	
-	default:  printf("Error No. 3\n");
+	default:  printf("error.\n");
 		//exit(1);
 		return -20191110;
 	}
@@ -128,7 +128,7 @@ int signswitch(char a)	   /* 符号转换。可优化 */
 	case '%': return 4;   case '^': return 5;
 	case '(': return 6;   case ')': return 7;
 	case '#': return 8;
-	default:  printf("Error No. 2\n"); return -1;
+	default:  printf("error.\n"); return -1;
 	}
 }
 char refusal(char a, char b)   /* 判定优先级 */
@@ -183,10 +183,19 @@ int main(void)
 				}
 				if(chinput[i]=='('){
 					if(i+1<len){
-						if(chinput[i+1]=='+' || chinput[i+1]=='^' || chinput[i+1]=='*' || chinput[i+1]=='/' || chinput[i+1]=='-'){
+						if(chinput[i+1]=='+' || chinput[i+1]=='^' || chinput[i+1]=='*' || chinput[i+1]=='/'){
 							//printf("error.\n");
 						ddd=1;
 						break;
+						}
+						else if(chinput[i+1]=='-'){
+							if(i+2<len){
+								if(chinput[i+2]>='0'&& chinput[i+2]<='9');
+								else{
+									ddd=1;
+									break;
+								}
+							}
 						}
 					}
 				}
@@ -246,7 +255,7 @@ int main(void)
 			{
 				if (flag == 1 && *p == '(')
 				{
-					printf("error.\n", p);
+					printf("error.\n");
 					//exit(0);
 					FF = 1;
 					break;
@@ -274,7 +283,7 @@ int main(void)
 
 					pushd(k);	  /* 计算结果入栈 */
 					break;
-				case Nul: printf("error.\n", p);
+				case Nul: printf("error.\n");
 					//exit(1);
 					FLAG = 1;
 
