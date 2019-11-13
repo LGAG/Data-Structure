@@ -72,23 +72,18 @@ int main(void){
 		char c;
 		int count = 0;
 		while(1){
-			//c = getchar();
 			c=tmp[temp];
 			temp++;
 			if(c == '#'){
-				//getchar();
 				while(1){
 					if(sta->top == 0) break;
 					if(sta->a[sta->top - 1] != '#'){
 						str[len] = sta->a[sta->top - 1];
 						len++;
-						//str[len]='\n';
 						str[len]='\0';
-						//printf("%c",sta->a[sta->top - 1]);
 					}
 					sta->top--;
 				}
-				//printf("\n");
 				printf("%s\n",str);
 				break;
 			}
@@ -99,19 +94,19 @@ int main(void){
 			else if(c >= '0' && c <= '9'){
 				str[len]=c;
 				len++;
-				//putchar(c);
 				continue;
 			}
 			else if(c >= 'a' && c <= 'z'){
 				str[len]=c;
 				len++;
-				//putchar(c);
 				continue;
 			}
 			else if(c >= 'A' && c <= 'Z'){
 				str[len]=c;
 				len++;
-				//putchar(c);
+				continue;
+			}
+			else if(c == ' '){
 				continue;
 			}
 			else{
@@ -119,7 +114,6 @@ int main(void){
 				if(comp(sta->a[sta->top - 1] , c) > 0){
 					str[len] = sta->a[sta->top - 1];
 					len++;
-					//printf("%c",sta->a[sta->top - 1]);
 					sta->top--;
 					goto g;
 				}
