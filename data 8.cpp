@@ -102,6 +102,10 @@ long operation(long int x, long int y, char a)
 
 	}
 	case '%': //printf("%d %% %d = %d\n",x,y,x%y); 
+	if(y == 0){
+		printf("error.\n");
+		return -20191110;
+	}
 		return (long int)fmod(x, y);
 	case '^': if (y >= 0) {
 		//printf("%d ^ %d = %d\n",x,y,(int)pow(x, y));
