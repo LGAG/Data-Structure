@@ -16,11 +16,9 @@ int initializeBiTree(BiTree T) {
 }
 
 int addBiTree(BiTree T, char c) {
-	//printf("c : %c\n", c);
 	if (c == '#') return -1;
 	if (T == NULL) return -2;
 	if (T->Lkid == NULL) {
-		//printf("1\n");
 		BiTree tmp;
 		tmp = (BiNode*)malloc(sizeof(BiNode));
 		tmp->elem = c;
@@ -30,7 +28,6 @@ int addBiTree(BiTree T, char c) {
 		return 1;
 	}
 	else if (T->Rkid == NULL) {
-		//printf("2\n");
 		BiTree tmp;
 		tmp = (BiNode*)malloc(sizeof(BiNode));
 		tmp->elem = c;
@@ -40,7 +37,6 @@ int addBiTree(BiTree T, char c) {
 		return 1;
 	}
 	else if (T->Lkid != NULL && T->Rkid != NULL) {
-		//printf("3\n");
 		if (addBiTree(T->Lkid, c) == 1)return 1;
 		if (addBiTree(T->Rkid, c) == 1)return 1;
 	}
@@ -108,7 +104,7 @@ int change_L_R(BiTree T) {
 		change_L_R(T->Lkid);
 		change_L_R(T->Rkid);
 		return 1;
-	}//if (T->Lkid != NULL && T->Rkid != NULL) 
+	}
 }
 
 int indentateBiTree(BiTree T, int deep) {
@@ -144,7 +140,6 @@ int main(void) {
 	T->Lkid = NULL;
 	T->Rkid = NULL;
 	T->elem = str[0];
-	//T = node[1];
 	for (int i = 1; i < len; i++) {
 		if (2 * i <= len) {
 			if (node[2 * i]->elem != '#') {
