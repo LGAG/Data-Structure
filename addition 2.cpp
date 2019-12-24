@@ -1,147 +1,188 @@
-#include <stdio.h>
-#include <stack>
-#include<stdlib.h>
+#include<stdio.h>
 #include<string.h>
-using namespace std;
+#include<stdlib.h>
+#pragma warning(disable:4996)
+int nodeNum, edgeNum;
+int topo[55], path[100];
+struct link
+{
+    int dir;
+    int val;
+};
+struct
+{
+    char name[5];
+    int inNum = 0; 
+    int outNum = 0; 
+    int Etv, Ltv;
+    link linkTo[300];
+    int linkNum = 0;
+}node[50];
 
-typedef struct node2{
-    int num;
-    int value;
-    int e;
-    int l;
-    struct node2 *next;
-}Node2;
-
-typedef struct VEX {
-	char start;
-	char end;
-	int value;
-}VEX;
-
-typedef struct node{
-    char name[10];
-    int visited;
-    int inDegree;
-    int outDegree;
-    struct node2 *next;
-}Node;
-
-typedef struct POINT {
-	char data[5];
-	int in;
-	stack <int> sta;
-	stack <int> s;
-}POINT;
-
-int sequence[100][100]={0};
-int head;
-int max_value = 0;
-Node2* node2[500];
-Node node[500];
-int stack[500] = {-1};
-int tail;
-int vNum, eNum;
-int topo = 0;
-int Topolist[500];
-int ve[500] = {0};
-int vl[500] = {0};
-
-
-int main(void) {
-	VEX vex[100];
-	POINT point[100];
-	char str[1000];
-	int n, m;
-	scanf("%d,%d", &n, &m);
-	vNum=n;
-	eNum=m;
-	getchar();
-	int k=0;
-    int qtemp=0;
-    int len=0;
-	for (int i = 0; i < n; i++) {
-		int count = 0;
-		while (1) {
-			char tmp;
-			scanf("%c", &tmp);
-			str[len]=tmp;
-			len++;
-			if (tmp == ',' || tmp == '\n'){
-				break;
-			}
-			point[i].data[count] = tmp;
-			count++;
-		}
-		point[i].data[count] = '\0';
-		point[i].in = 0;
-	}
-	str[len]='\0';
-	for(int i=0;i<strlen(str);i++){
-        if(str[i]!=','){
-            node[k].name[qtemp++]=str[i];
-        }
-        else {
-            node[k].name[qtemp]='\0';
-            node[k].inDegree = 0;
-            node[k].outDegree = 0;
-            node[k].next = NULL;
-            node[k].visited = 0;
-            k++;
-            qtemp=0;
-        }
-    }
-	for (int i = 0; i < m; i++) {
-		getchar();
-		scanf("%d,%d,%d", &vex[i].start, &vex[i].end, &vex[i].value);
-		getchar();
-		point[vex[i].end].in++;
-		printf("vex[%d]=%d\n",i,vex[i].end);
-		getchar();
-		point[vex[i].start].sta.push(vex[i].end);
-		point[vex[i].start].s.push(vex[i].end);
-	}
-	printf("----------------------------------\n");
-	int flag=0;
-	for(int i=0;i<n;i++){
-		printf("point[%d] = %d\n",i,point[i].in);
-	}
-	for(int i=0;i<n;i++){
-		if(point[i].in==0){
-			if(i==0) {
-				printf("%s",point[i].data);
-				flag++;
-				head=i;
-				point[i].in=-1;
-			}
-			else {
-				//printf("-%s",point[i].data);
-				point[i].in=-1;
-			}
-			tail=i;
-		}
-	}
-	for (int i = 0; i < n; i++) {
-		if(point[i].in==-1 && i!=0) continue;
-		while (!point[i].sta.empty()) {
-			point[point[i].sta.top()].in--;
-			point[i].sta.pop();
-		}
-		for(int j=0;j<n;j++){
-			if(point[j].in==0){
-				if(flag==0) {
-					printf("%s",point[j].data);
-					flag++;
-					point[j].in=-1;
-					head=j;
-				}
-				else {
-					printf("-%s",point[j].data);
-					point[j].in=-1;
-				}
-				tail=j;
-			}
-		}
-	}
-	
+int cmp1(const void *p1, const void *p2)
+{
+    struct link *c = (link *)p1;
+    struct link *d = (link *)p2;
+    return (c->dir) > (d->dir);
+}
+int cmp2(const void *p1, const void *p2)
+{
+    struct link *c = (link *)p1;
+    struct link *d = (link *)p2;
+    return (c->dir) < (d->dir);
 }
 
+void CreateGraph()
+{
+    char str[500] = { '\0' };
+    scanf("%s", str);
+    int len = strlen(str), q = 0, k = 0;
+    for (int i = 0; i < len; i++)
+    {
+        if (str[i] != ',')
+            node[k].name[q++] = str[i];
+        else
+        {
+            node[k].name[q] = '\0';
+            k++;
+            q = 0;
+        }
+    }
+
+    int p = 0, k_flag = 0;
+    int ch_data[5], cd_p = 0;
+    char chs[10] = { '\0' }, ch;
+    getchar();
+    while ((ch = getchar()))
+    {
+        if (ch == '\n' || ch == -1)
+            break;
+        if (ch == '<')
+        {
+            k_flag = 1;
+            continue;
+        }
+        if (ch == ','&&k_flag == 1)
+        {
+            ch_data[cd_p] = atoi(chs);
+            memset(chs, '\0', sizeof(chs));
+            p = 0;
+            cd_p++;
+            continue;
+        }
+        if (ch != '<'&&ch != ','&&k_flag == 1 && ch != '>')
+        {
+            chs[p++] = ch;
+            continue;
+        }
+        if (ch == '>'&&k_flag == 1)
+        {
+            ch_data[cd_p] = atoi(chs);
+            int u = ch_data[0];
+            node[u].linkTo[node[u].linkNum].dir = ch_data[1];
+            node[u].linkTo[node[u].linkNum].val = ch_data[2];
+            node[u].outNum++;
+            node[ch_data[1]].inNum++;
+            node[u].linkNum++;
+            k_flag = 0;
+            p = 0;
+            cd_p = 0;
+            memset(chs, '\0', sizeof(chs));
+            continue;
+        }
+    }
+    for (int i = 0; i < nodeNum; i++)
+        qsort(node[i].linkTo, node[i].linkNum + 1, sizeof(node[i].linkTo[0]), cmp1);
+}
+
+int TopoLogicalSort_DFS()
+{
+    int *Stack, u, v, top = 0, count = 0;
+    Stack = (int*)malloc(sizeof(int) * nodeNum);
+    for (int i = 0; i < nodeNum; i++)
+    {
+        node[i].Etv = 0; 
+        if (node[i].inNum == 0)
+            Stack[top++] = i;
+    }
+    while (top > 0)
+    {
+        u = Stack[--top];
+        topo[count++] = u;
+
+        for (int i = 0; i <= node[u].linkNum; i++)
+        {
+            int v = node[u].linkTo[i].dir;
+            if (node[v].Etv < node[u].Etv + node[u].linkTo[i].val)
+                node[v].Etv = node[u].Etv + node[u].linkTo[i].val;
+            if (--node[v].inNum == 0)
+                Stack[top++] = v;
+        }
+        qsort(Stack, top, sizeof(Stack[0]), cmp2);
+    }
+    free(Stack);
+    return (count == nodeNum);
+}
+
+void PrintPath(int top, int end)
+{
+    int u = path[top - 1];
+    if (u == end)
+    {
+        printf("%s", node[path[0]].name); 
+        for (int i = 1; i < top; i++)
+            printf("-%s", node[path[i]].name);
+        printf("\n");
+        return;
+    }
+    for (int i = 0; i <= node[u].linkNum; i++)
+    {
+        int v = node[u].linkTo[i].dir;
+        if (node[u].Etv + node[u].linkTo[i].val < node[v].Etv)
+            continue;
+        if (node[v].Etv == node[v].Ltv)
+        {
+            path[top++] = node[u].linkTo[i].dir;
+            PrintPath(top, end);
+            top--;
+        }
+    }
+}
+
+void CriticalPath()
+{
+    if (!TopoLogicalSort_DFS())
+    {
+        printf("NO TOPOLOGICAL PATH\n");
+        return;
+    }
+    for (int i = 0; i < nodeNum; i++)
+    {
+        node[i].Ltv = node[nodeNum - 1].Etv;
+        if (i)
+            printf("-");
+        printf("%s", node[topo[i]].name);
+    }
+    printf("\n");
+    for (int i = nodeNum - 2; i >= 0; i--)
+    {
+        int u = topo[i];
+        for (int j = 0; j <= node[u].linkNum; j++)
+        {
+            int v = node[u].linkTo[j].dir;
+            if (node[u].Ltv > node[v].Ltv - node[u].linkTo[j].val) 
+                node[u].Ltv = node[v].Ltv - node[u].linkTo[j].val;
+        }
+    }
+    path[0] = topo[0];
+    PrintPath(1, topo[nodeNum - 1]);
+}
+
+int main()
+{
+    scanf("%d,%d", &nodeNum, &edgeNum);
+    CreateGraph();
+    CriticalPath();
+    system("pause");
+    return 0;
+}
